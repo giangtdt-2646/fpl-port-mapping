@@ -1,0 +1,11 @@
+FROM node:20-alpine
+WORKDIR /usr/src/app
+RUN apk update && \
+    apk add --no-cache openssh-client curl && \
+    rm -rf /var/cache/apk/*
+RUN npm i -g @nestjs/cli
+RUN apk add curl --no-cache
+COPY . .
+RUN npm install
+EXPOSE 3002
+CMD ["npm", "run", "start:dev"]

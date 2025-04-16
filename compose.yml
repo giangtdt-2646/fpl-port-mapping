@@ -1,0 +1,35 @@
+volumes:
+  port-mapping-redis_volume:
+services:
+  port-mapping:
+    container_name: fpl-port-mapping
+    build:
+      context: ./
+      dockerfile: ./.docker/dockerfile
+    platform: linux/amd64
+    restart: always
+    image: node-fpl-port-mapping:20-alpine
+    stdin_open: true
+    tty: true
+    user: "${UID}:${GID}"
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - "3002:3002"
+    depends_on:
+      - redis
+    networks:
+      - fpl-port-mapping
+  redis:
+    image: redis:latest
+    container_name: fpl-port-mapping-redis
+    restart: always
+    volumes:
+      - port-mapping-redis_volume:/data
+    networks:
+      - fpl-port-mapping
+networks:
+  fpl-port-mapping:
+    driver: bridge
+    name: fpl-port-mapping
