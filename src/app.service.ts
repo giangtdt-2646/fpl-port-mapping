@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { exec } from 'child_process';
 
 @Injectable()
 export class AppService {
+  constructor(private configService: ConfigService) {}
+
   async exec(): Promise<string> {
     try {
       const portMapped = await this.execPortMapping();
@@ -14,9 +17,16 @@ export class AppService {
   }
 
   async execPortMapping(): Promise<boolean> {
-    const { error, stdout, stderr } = await this.execAsync(
-      `ssh ec2-user@18.177.237.31 'bash script/change_tg_api.sh'`,
+    const portMappingCommand = this.configService.get<string>(
+      'PORT_MAPPING_COMMAND',
     );
+
+    if (!portMappingCommand) {
+      console.error('PORT_MAPPING_COMMAND not defined');
+      return false;
+    }
+
+    const { error, stdout, stderr } = await this.execAsync(portMappingCommand);
     if (error) {
       console.error(`execPortMapping error: ${error}`);
       return false;
