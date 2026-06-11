@@ -5,9 +5,15 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post()
+  @Post('/dev1')
   @HttpCode(200)
-  async exec(): Promise<string> {
-    return await this.appService.exec();
+  async openPortDev1(): Promise<string> {
+    return await this.appService.exec('dev1');
+  }
+
+  @Post('/dev2')
+  @HttpCode(200)
+  async openPortDev2(): Promise<string> {
+    return await this.appService.exec('dev2');
   }
 }

@@ -3,31 +3,33 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class AppService {
-  async exec(): Promise<string> {
+  async exec(server: 'dev1' | 'dev2'): Promise<string> {
     try {
-      const portMapped = await this.execPortMapping();
-      return portMapped ? 'port mapping success' : 'port mapping failed';
+      const portMapped = await this.execPortMapping(server);
+      return portMapped ? `port mapping success for server ${server}` : `port mapping failed for server ${server}`;
     } catch (error) {
       console.error(`Execution error: ${error}`);
       return 'port mapping failed';
     }
   }
 
-  async execPortMapping(): Promise<boolean> {
+  async execPortMapping(server: 'dev1' | 'dev2'): Promise<boolean> {
+    const dev1 = 'ec2-user@18.177.237.31';
+    const dev2 = 'ec2-user@52.69.79.171';
     const { error, stdout, stderr } = await this.execAsync(
-      `ssh ec2-user@18.177.237.31 'bash script/change_tg_api.sh'`,
+      `ssh ${server === 'dev1' ? dev1 : dev2} 'bash script/change_tg_api.sh'`,
     );
     if (error) {
-      console.error(`execPortMapping error: ${error}`);
+      console.error(`execPortMapping error - ${server}: ${error}`);
       return false;
     }
 
     if (stderr) {
-      console.error(`execPortMapping stderr: ${stderr}`);
+      console.error(`execPortMapping stderr - ${server}: ${stderr}`);
       return false;
     }
-
-    console.log(`execPortMapping stdout:\n${stdout}`);
+    console.log(`execPortMapping server ${server} success at `, new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    console.log(`execPortMapping server ${server} stdout:\n${stdout}`);
 
     return true;
   }
