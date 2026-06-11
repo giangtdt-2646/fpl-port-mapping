@@ -1,6 +1,7 @@
 # dependencies
 /node_modules
 /dist
+.yarn/
 
 # environment variables
 .env

@@ -26,18 +26,6 @@ export interface ServerConfig {
 
 const COGNITO_REGION = 'ap-northeast-1';
 
-// Bastion + Aurora endpoints per server (mirrors the ssh -L commands in .env comments).
-const TUNNELS: Record<Server, { bastion: string; remoteHost: string }> = {
-  dev1: {
-    bastion: 'ec2-user@18.177.237.31',
-    remoteHost: 'refpl-dev-cluster-rds-aurora.cluster-cqx8lcbftqoq.ap-northeast-1.rds.amazonaws.com',
-  },
-  dev2: {
-    bastion: 'ec2-user@52.69.79.171',
-    remoteHost: 'refpl-dev2-cluster-rds-aurora.cluster-cqx8lcbftqoq.ap-northeast-1.rds.amazonaws.com',
-  },
-};
-
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -66,10 +54,10 @@ export function getServerConfig(server: Server): ServerConfig {
       clientId: required(`AWS_COGNITO_CLIENT_ID_${suffix}`),
     },
     tunnel: {
-      bastion: TUNNELS[server].bastion,
+      bastion: required(`SSH_BASTION_${suffix}`),
       localPort,
-      remoteHost: TUNNELS[server].remoteHost,
-      remotePort: 5432,
+      remoteHost: required(`DB_REMOTE_HOST_${suffix}`),
+      remotePort: Number(process.env[`DB_REMOTE_PORT_${suffix}`] || 5432),
     },
   };
 }
