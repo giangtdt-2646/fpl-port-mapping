@@ -1,7 +1,11 @@
 # dependencies
 /node_modules
 /dist
+
+# yarn (this project uses npm; ignore stray Yarn Berry / PnP artifacts)
 .yarn/
+.pnp.*
+yarn.lock
 
 # environment variables
 .env
