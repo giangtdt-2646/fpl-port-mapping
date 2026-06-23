@@ -1,4 +1,4 @@
-export type Server = 'dev1' | 'dev2';
+export type Server = 'dev1' | 'dev2' | 'stg4';
 
 export type Role = 'owner' | 'manager' | 'editor' | 'viewer';
 

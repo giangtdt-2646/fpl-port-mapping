@@ -4,6 +4,7 @@ import {
   AdminCreateUserCommand,
   AdminSetUserPasswordCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { Server } from './create-account.dto';
 import { getServerConfig } from './server-config';
 
@@ -18,10 +19,16 @@ export class CognitoService {
     if (!client) {
       client = new CognitoIdentityProviderClient({
         region: cognito.region,
-        credentials: {
-          accessKeyId: cognito.accessKeyId,
-          secretAccessKey: cognito.secretAccessKey,
-        },
+        // A named profile resolves its (assume-role) credentials from the shared
+        // AWS config/credentials files. fromIni (not defaultProvider) is used on
+        // purpose: it reads ONLY the named profile and ignores AWS_* environment
+        // variables, so the per-server profile can't be silently overridden.
+        credentials: cognito.profile
+          ? fromIni({ profile: cognito.profile })
+          : {
+              accessKeyId: cognito.accessKeyId!,
+              secretAccessKey: cognito.secretAccessKey!,
+            },
       });
       this.clients.set(server, client);
     }
