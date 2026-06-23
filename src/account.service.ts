@@ -153,8 +153,8 @@ export class AccountService {
       throw new BadRequestException('Request body is required');
     }
 
-    if (body.server !== 'dev1' && body.server !== 'dev2') {
-      throw new BadRequestException(`server must be "dev1" or "dev2"`);
+    if (body.server !== 'dev1' && body.server !== 'dev2' && body.server !== 'stg4') {
+      throw new BadRequestException(`server must be "dev1", "dev2" or "stg4"`);
     }
 
     const email = typeof body.email === 'string' ? body.email.trim() : '';
