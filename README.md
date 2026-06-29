@@ -37,12 +37,13 @@ Content-Type: application/json
 | `server`          | yes      | `dev1` \| `dev2` \| `stg4`                                               |
 | `email`           | yes      | Account email; used as the Cognito username.                             |
 | `role`            | yes      | `owner` \| `manager` \| `editor` \| `viewer`                            |
-| `hjn_num`         | one of   | Maintenance-company number. Sets `user_type = maintenanceCompany`.       |
-| `lease_company_id`| one of   | Lease company id. Sets `user_type = lease`.                              |
+| `hjnNum`          | one of   | Maintenance-company number. Sets `user_type = maintenanceCompany`.       |
+| `leaseCompanyId`  | one of   | Lease company id. Sets `user_type = lease`.                              |
+| `isNewFront`      | no       | Boolean, defaults to `false`. When `true`, sets `user_type = maintenanceNewFront`. Only allowed together with `hjnNum`. |
 | `userName`        | no       | Display name. Defaults to the local part of the email.                   |
 | `password`        | no       | Cognito password. Falls back to the default when omitted.                |
 
-Exactly one of `hjn_num` / `lease_company_id` must be provided.
+Exactly one of `hjnNum` / `leaseCompanyId` must be provided.
 
 Example:
 
@@ -54,7 +55,7 @@ curl --location 'http://localhost:3002/api/fpl-support/create-account' \
     "email": "someone@example.com",
     "userName": "Some One",
     "role": "owner",
-    "lease_company_id": "013"
+    "leaseCompanyId": "013"
   }'
 ```
 
@@ -63,13 +64,13 @@ Response (`201`):
 ```json
 {
   "server": "stg4",
-  "user_id": 213711,
+  "userId": 213711,
   "email": "someone@example.com",
-  "user_name": "Some One",
-  "user_type": "lease",
+  "userName": "Some One",
+  "userType": "lease",
   "role": "owner",
-  "hjn_num": null,
-  "lease_company_id": "013"
+  "hjnNum": null,
+  "leaseCompanyId": "013"
 }
 ```
 

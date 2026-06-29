@@ -21,16 +21,24 @@ export interface CreateAccountDto {
   userName?: string | null;
 
   /**
-   * Maintenance-company number. Mutually exclusive with lease_company_id.
-   * When set, the account is created with user_type = 'maintenanceCompany'.
+   * Maintenance-company number. Mutually exclusive with leaseCompanyId.
+   * When set, the account is created with user_type = 'maintenanceCompany'
+   * (or 'maintenanceNewFront' when isNewFront is true).
    */
-  hjn_num?: string | null;
+  hjnNum?: string | null;
 
   /**
-   * Lease company id. Mutually exclusive with hjn_num.
+   * Lease company id. Mutually exclusive with hjnNum.
    * When set, the account is created with user_type = 'lease'.
    */
-  lease_company_id?: string | null;
+  leaseCompanyId?: string | null;
+
+  /**
+   * When true, create the maintenance-company user with
+   * user_type = 'maintenanceNewFront'. Can only be used together with hjnNum.
+   * Defaults to false.
+   */
+  isNewFront?: boolean;
 
   /** Optional Cognito password. Falls back to the default when omitted. */
   password?: string;
