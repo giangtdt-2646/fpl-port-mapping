@@ -14,17 +14,17 @@ import { getServerConfig } from './server-config';
 const DEFAULT_PASSWORD = 'Aa!123456';
 const USER_TABLE = 'user_management.mfpdg012_user_master';
 
-type UserType = 'lease' | 'maintenanceCompany';
+type UserType = 'lease' | 'maintenanceCompany' | 'maintenanceNewFront';
 
 export interface CreateAccountResult {
   server: Server;
-  user_id: number;
+  userId: number;
   email: string;
-  user_name: string;
-  user_type: UserType;
+  userName: string;
+  userType: UserType;
   role: string;
-  hjn_num: string | null;
-  lease_company_id: string | null;
+  hjnNum: string | null;
+  leaseCompanyId: string | null;
 }
 
 @Injectable()
@@ -38,7 +38,11 @@ export class AccountService {
 
   async createAccount(body: CreateAccountDto): Promise<CreateAccountResult> {
     const dto = this.validate(body);
-    const userType: UserType = dto.hjn_num ? 'maintenanceCompany' : 'lease';
+    const userType: UserType = dto.hjnNum
+      ? dto.isNewFront
+        ? 'maintenanceNewFront'
+        : 'maintenanceCompany'
+      : 'lease';
     const password = dto.password || DEFAULT_PASSWORD;
     // Default user_name to the local part of the email (before "@") when not given.
     const userName = dto.userName?.trim() || dto.email.split('@')[0];
@@ -74,8 +78,8 @@ export class AccountService {
     // 2. DB: insert the user_master row.
     try {
       const row = await this.insertUserMaster(dto.server, {
-        hjn_num: dto.hjn_num ?? null,
-        lease_company_id: dto.lease_company_id ?? null,
+        hjn_num: dto.hjnNum ?? null,
+        lease_company_id: dto.leaseCompanyId ?? null,
         email: dto.email,
         role: dto.role,
         userType,
@@ -84,13 +88,13 @@ export class AccountService {
       this.logger.log(`[${dto.server}] user_master inserted: user_id=${row.user_id}`);
       return {
         server: dto.server,
-        user_id: row.user_id,
+        userId: row.user_id,
         email: dto.email,
-        user_name: userName,
-        user_type: userType,
+        userName,
+        userType,
         role: dto.role,
-        hjn_num: dto.hjn_num ?? null,
-        lease_company_id: dto.lease_company_id ?? null,
+        hjnNum: dto.hjnNum ?? null,
+        leaseCompanyId: dto.leaseCompanyId ?? null,
       };
     } catch (error) {
       // The Cognito user was already created above; surface that so it can be cleaned up.
@@ -166,20 +170,26 @@ export class AccountService {
       throw new BadRequestException(`role must be one of: ${ROLES.join(', ')}`);
     }
 
-    const hjn_num = body.hjn_num?.toString().trim() || null;
-    const lease_company_id = body.lease_company_id?.toString().trim() || null;
+    const hjnNum = body.hjnNum?.toString().trim() || null;
+    const leaseCompanyId = body.leaseCompanyId?.toString().trim() || null;
+    const isNewFront = body.isNewFront === true;
 
-    if (hjn_num && lease_company_id) {
+    if (hjnNum && leaseCompanyId) {
       throw new BadRequestException(
-        'Provide either hjn_num or lease_company_id, not both',
+        'Provide either hjnNum or leaseCompanyId, not both',
       );
     }
-    if (!hjn_num && !lease_company_id) {
+    if (!hjnNum && !leaseCompanyId) {
       throw new BadRequestException(
-        'Either hjn_num or lease_company_id is required',
+        'Either hjnNum or leaseCompanyId is required',
+      );
+    }
+    if (isNewFront && !hjnNum) {
+      throw new BadRequestException(
+        'isNewFront can only be used together with hjnNum',
       );
     }
 
-    return { ...body, email, hjn_num, lease_company_id };
+    return { ...body, email, hjnNum, leaseCompanyId, isNewFront };
   }
 }
